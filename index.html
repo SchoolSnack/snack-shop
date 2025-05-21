@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园零食铺</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF6B35',
+                        secondary: '#4ECDC4',
+                        neutral: {
+                            100: '#F7F7F7',
+                            800: '#2C2C2C',
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="font-inter bg-neutral-100 text-neutral-800 min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <header class="fixed w-full top-0 z-50 bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-candy-cane text-primary text-2xl"></i>
+                <h1 class="text-xl font-bold">校园零食铺</h1>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <button id="my-orders-btn" class="hidden md:block font-medium hover:text-primary transition-colors">我的订单</button>
+                <button id="contact-us-btn" class="hidden md:block font-medium hover:text-primary transition-colors">联系我们</button>
+                <button id="admin-login-btn" class="hidden md:block font-medium hover:text-primary transition-colors">管理登录</button>
+                <button id="cart-toggle" class="relative p-2 rounded-full hover:bg-neutral-100 transition-colors">
+                    <i class="fa-solid fa-shopping-cart text-lg"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-primary text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">0</span>
+                </button>
+                
+                <button id="menu-toggle" class="md:hidden p-2 rounded-full hover:bg-neutral-100 transition-colors">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <button id="mobile-my-orders-btn" class="py-2 font-medium hover:text-primary transition-colors text-left">我的订单</button>
+                <button id="mobile-contact-us-btn" class="py-2 font-medium hover:text-primary transition-colors text-left">联系我们</button>
+                <button id="mobile-admin-login-btn" class="py-2 font-medium hover:text-primary transition-colors text-left">管理登录</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 购物车侧边栏 -->
+    <div id="cart-sidebar" class="fixed top-0 right-0 w-full md:w-96 h-full bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50 overflow-y-auto">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">我的购物车</h2>
+                <button id="close-cart" class="p-2 rounded-full hover:bg-neutral-100 transition-colors">
+                    <i class="fa-solid fa-times text-lg"></i>
+                </button>
+            </div>
+            
+            <div id="cart-items" class="space-y-4 mb-8">
+                <div id="empty-cart" class="flex flex-col items-center justify-center py-12">
+                    <i class="fa-solid fa-shopping-cart text-neutral-300 text-5xl mb-4"></i>
+                    <p class="text-neutral-500">购物车是空的</p>
+                </div>
+                
+                <div id="cart-items-list" class="hidden space-y-4"></div>
+            </div>
+            
+            <div id="cart-summary" class="hidden pt-4 border-t">
+                <div class="flex justify-between mb-2">
+                    <span class="text-neutral-600">小计</span>
+                    <span id="subtotal" class="font-medium">¥0.00</span>
+                </div>
+                <div class="flex justify-between mb-6">
+                    <span class="text-neutral-600">配送费</span>
+                    <span id="delivery-fee" class="font-medium">¥0.00</span>
+                </div>
+                <div class="flex justify-between mb-6">
+                    <span class="text-lg font-bold">总计</span>
+                    <span id="total" class="text-lg font-bold text-primary">¥0.00</span>
+                </div>
+                
+                <button id="checkout-btn" class="w-full py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors">
+                    结算订单
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 遮罩层 -->
+    <div id="overlay" class="fixed inset-0 bg-black/50 z-40 hidden"></div>
+    
+    <!-- 主内容 -->
+    <main class="flex-grow pt-16">
+        <!-- 英雄区 -->
+        <section class="relative bg-gradient-to-r from-primary/90 to-secondary/90 text-white py-20 overflow-hidden">
+            <div class="container mx-auto px-4 relative z-10">
+                <div class="max-w-2xl">
+                    <h1 class="text-[clamp(2rem,5vw,3rem)] font-bold mb-4">美味零食，一键送到宿舍楼下</h1>
+                    <p class="text-lg opacity-90 mb-8">校园零食铺为你提供各种美味零食，随时满足你的味蕾！</p>
+                    <a href="#products" class="px-6 py-3 bg-white text-primary font-medium rounded-lg shadow-lg hover:shadow-xl transition-all">
+                        立即选购
+                    </a>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 全部商品 -->
+        <section id="products" class="py-12 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-8">
+                    <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold mb-4">全部商品</h2>
+                </div>
+                
+                <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                    <!-- 商品卡片将通过JS动态生成 -->
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- 页脚 -->
+    <footer class="bg-neutral-800 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-bold mb-4">关于我们</h3>
+                    <p class="text-neutral-400">校园零食铺是为广大学生提供便捷零食购买服务的平台，致力于为同学们提供优质的零食和服务。</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">联系方式</h3>
+                    <ul class="space-y-2 text-neutral-400">
+                        <li class="flex items-center"><i class="fa-solid fa-phone mr-2"></i> 联系电话: 13800138000</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-white/10 text-center text-neutral-500">
+                <p>&copy; 2025 校园零食铺. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- 我的订单模态框 -->
+    <div id="my-orders-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="absolute inset-0 bg-black/50"></div>
+        <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-4 overflow-hidden">
+            <div class="p-6 border-b flex justify-between items-center">
+                <h2 class="text-xl font-bold">我的订单</h2>
+                <button id="close-orders" class="p-2 rounded-full hover:bg-neutral-100 transition-colors">
+                    <i class="fa-solid fa-times text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 max-h-[70vh] overflow-y-auto">
+                <div class="mb-6 flex justify-between items-center">
+                    <div class="relative">
+                        <input type="text" id="search-orders" placeholder="搜索订单..." class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"></i>
+                    </div>
+                    <div>
+                        <select id="filter-order-status" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option value="">全部状态</option>
+                            <option value="pending">待付款</option>
+                            <option value="processing">处理中</option>
+                            <option value="delivered">已送达</option>
+                            <option value="cancelled">已取消</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="orders-container" class="space-y-4">
+                    <div id="empty-orders" class="flex flex-col items-center justify-center py-12">
+                        <i class="fa-solid fa-file-text text-neutral-300 text-5xl mb-4"></i>
+                        <p class="text-neutral-500">暂无订单记录</p>
+                    </div>
+                    
+                    <div id="orders-list" class="hidden space-y-4"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 联系我们模态框 -->
+    <div id="contact-us-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="absolute inset-0 bg-black/50"></div>
+        <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+            <div class="p-6 border-b">
+                <h2 class="text-xl font-bold">联系我们</h2>
+            </div>
+            
+            <div class="p-6">
+                <div class="mb-6">
+                    <p class="text-neutral-600">如果您有任何问题或建议，请通过以下方式联系我们：</p>
+                    
+                    <div class="mt-4 space-y-4">
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-4 flex-shrink-0">
+                                <i class="fa-solid fa-phone"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium">电话咨询</h3>
+                                <p class="text-neutral-600">13800138000</p>
+                                <p class="text-sm text-neutral-500">工作时间: 9:00 - 21:00</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-4 flex-shrink-0">
+                                <i class="fa-solid fa-comments"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium">在线客服</h3>
+                                <p class="text-neutral-600">点击下方按钮联系在线客服</p>
+                                <button id="online-support-btn" class="mt-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                                    联系客服
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pt-6 border-t">
+                    <h3 class="font-medium mb-3">常见问题</h3>
+                    <div class="space-y-3">
+                        <div class="border border-neutral-200 rounded-lg overflow-hidden">
+                            <button class="faq-toggle w-full flex justify-between items-center p-3 hover:bg-neutral-50 transition-colors">
+                                <span class="font-medium">配送时间是多久？</span>
+                                <i class="fa-solid fa-chevron-down text-neutral-400 transition-transform"></i>
+                            </button>
+                            <div class="faq-content hidden p-3 bg-neutral-50 border-t">
+                                <p class="text-neutral-600">一般情况下，订单会在30分钟内送达。高峰期可能会有所延迟，请耐心等待。</p>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-neutral-200 rounded-lg overflow-hidden">
+                            <button class="faq-toggle w-full flex justify-between items-center p-3 hover:bg-neutral-50 transition-colors">
+                                <span class="font-medium">如何取消订单？</span>
+                                <i class="fa-solid fa-chevron-down text-neutral-400 transition-transform"></i>
+                            </button>
+                            <div class="faq-content hidden p-3 bg-neutral-50 border-t">
+                                <p class="text-neutral-600">在订单未开始处理前，您可以在"我的订单"中自行取消。若订单已开始配送，建议您直接联系客服取消。</p>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-neutral-200 rounded-lg overflow-hidden">
+                            <button class="faq-toggle w-full flex justify-between items-center p-3 hover:bg-neutral-50 transition-colors">
+                                <span class="font-medium">可以退换货吗？</span>
+                                <i class="fa-solid fa-chevron-down text-neutral-400 transition-transform"></i>
+                            </button>
+                            <div class="faq-content hidden p-3 bg-neutral-50 border-t">
+                                <p class="text-neutral-600">如商品存在质量问题，请在收到商品后1小时内联系客服，并提供相关照片，我们将为您安排退换货。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 管理员登录模态框 -->
+    <div id="admin-login-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="absolute inset-0 bg-black/50"></div>
+        <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="p-6 border-b">
+                <h2 class="text-xl font-bold">管理员登录</h2>
+            </div>
+            
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm mb-1">用户名</label>
+                        <input type="text" placeholder="请输入用户名" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">密码</label>
+                        <input type="password" placeholder="请输入密码" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <button id="login-btn" class="w-full py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors">
+                        登录
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 价格管理模态框 -->
+    <div id="price-management-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="absolute inset-0 bg-black/50"></div>
+        <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-4 overflow-hidden">
+            <div class="p-6 border-b flex justify-between items-center">
+                <h2 class="text-xl font-bold">零食价格管理</h2>
+                <button id="close-price-management" class="p-2 rounded-full hover:bg-neutral-100 transition-colors">
+                    <i class="fa-solid fa-times text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 max-h-[70vh] overflow-y-auto">
+                <div class="mb-6 flex justify-between items-center">
+                    <div class="relative">
+                        <input type="text" id="search-product" placeholder="搜索零食..." class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"></i>
+                    </div>
+                    <div>
+                        <select id="filter-category" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option value="">全部类别</option>
+                            <option value="饼干糕点">饼干糕点</option>
+                            <option value="糖果巧克力">糖果巧克力</option>
+                            <option value="膨化食品">膨化食品</option>
+                            <option value="肉干卤味">肉干卤味</option>
+                            <option value="坚果炒货">坚果炒货</option>
+                            <option value="饮料酒水">饮料酒水</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y">
+                        <thead>
+                            <tr>
+                                <th class="px-6 py-3 bg-neutral-50 text-left text-xs font-medium text-neutral-500 uppercase">零食名称</th>
+                                <th class="px-6 py-3 bg-neutral-50 text-left text-xs font-medium text-neutral-500 uppercase">类别</th>
+                                <th class="px-6 py-3 bg-neutral-50 text-left text-xs font-medium text-neutral-500 uppercase">当前价格</th>
+                                <th class="px-6 py-3 bg-neutral-50 text-left text-xs font-medium text-neutral-500 uppercase">原价</th>
+                                <th class="px-6 py-3 bg-neutral-50 text-left text-xs font-medium text-neutral-500 uppercase">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="price-management-table" class="bg-white divide-y">
+                            <!-- 价格管理表格内容将通过JS动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="p-6 border-t flex justify-end">
+                <button id="save-prices" class="px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors">
+                    保存修改
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 价格编辑模态框 -->
+    <div id="price-edit-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="absolute inset-0 bg-black/50"></div>
+        <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="p-6 border-b">
+                <h2 class="text-xl font-bold">编辑价格</h2>
+            </div>
+            
+            <div class="p-6">
+                <div class="mb-4">
+                    <label class="block text-sm mb-1">零食名称</label>
+                    <p id="edit-product-name" class="font-medium"></p>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm mb-1">当前售价</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2">¥</span>
+                            <input type="number" id="edit-price" step="0.01" class="w-full pl-8 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">原价</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2">¥</span>
+                            <input type="number" id="edit-original-price" step="0.01" class="w-full pl-8 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <button id="confirm-edit-price" class="w-full py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors">
+                        确认修改
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 结算模态框 -->
+    <div id="checkout-modal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="absolute inset-0 bg-black/50"></div>
+        <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+            <div class="p-6 border-b">
+                <h2 class="text-xl font-bold">确认订单</h2>
+            </div>
+            
+            <div class="p-6 max-h-[60vh] overflow-y-auto">
+                <div id="checkout-items" class="space-y-4 mb-8">
+                    <!-- 结算商品列表将通过JS动态生成 -->
+                </div>
+                
+                <div class="pt-4 border-t">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-neutral-600">小计</span>
+                        <span id="checkout-subtotal" class="font-medium">¥0.00</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-neutral-600">配送费</span>
+                        <span id="checkout-delivery-fee" class="font-medium">¥0.00</span>
+                    </div>
+                    <div class="flex justify-between mb-6">
+                        <span class="text-lg font-bold">总计</span>
+                        <span id="checkout-total" class="text-lg font-bold text-primary">¥0.00</span>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="font-medium mb-3">配送信息</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm mb-1">姓名</label>
+                            <input type="text" placeholder="请输入姓名" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">联系电话</label>
+                            <input type="tel" placeholder="请输入手机号码" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">宿舍楼</label>
+                            <select class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="">请选择宿舍楼</option>
+                                <option value="1">一号楼</option>
+                                <option value="2">二号楼</option>
+                                <option value="3">三号楼</option>
+                                <option value="4">四号楼</option>
+                                <option value="5">五号楼</option>
+                                <option value="6">六号楼</option>
+                                <option value="7">七号楼</option>
+                                <option value="8">八号楼</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6 border-t flex justify-between items-center">
+                <button id="cancel-checkout" class="px-4 py-2 text-neutral-600 font-medium hover:text-neutral-800 transition-colors">
+                    取消
+                </button>
+                <button id="place-order" class="px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors">
+                    提交订单
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 成功提示 -->
+    <div id="success-toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3 opacity-0 transition-all duration-300 translate-y-20 z-50">
+        <i class="fa-solid fa-check-circle"></i>
+        <span>订单提交成功！我们将尽快为您配送</span>
+    </div>
+    
+    <script>
+        // 商品数据
+        const products = [
+            { id: 1, name: '奥利奥夹心饼干', category: '饼干糕点', price: 5.5, originalPrice: 6.5, image: 'https://picsum.photos/200/200?random=1' },
+            { id: 2, name: '德芙巧克力', category: '糖果巧克力', price: 12.8, originalPrice: 15.0, image: 'https://picsum.photos/200/200?random=2' },
+            { id: 3, name: '乐事薯片', category: '膨化食品', price: 4.5, originalPrice: 5.0, image: 'https://picsum.photos/200/200?random=3' },
+            { id: 4, name: '猪肉脯', category: '肉干卤味', price: 8.9, originalPrice: 10.0, image: 'https://picsum.photos/200/200?random=4' },
+            { id: 5, name: '恰恰瓜子', category: '坚果炒货', price: 6.5, originalPrice: 7.5, image: 'https://picsum.photos/200/200?random=5' },
+            { id: 6, name: '可口可乐', category: '饮料酒水', price: 3.0, originalPrice: 3.5, image: 'https://picsum.photos/200/200?random=6' },
+            { id: 7, name: '好丽友派', category: '饼干糕点', price: 7.8, originalPrice: 9.0, image: 'https://picsum.photos/200/200?random=7' },
+            { id: 8, name: '阿尔卑斯奶糖', category: '糖果巧克力', price: 9.9, originalPrice: 12.0, image: 'https://picsum.photos/200/200?random=8' },
+            { id: 9, name: '可比克薯片', category: '膨化食品', price: 4.0, originalPrice: 4.5, image: 'https://picsum.photos/200/200?random=9' },
+            { id: 10, name: '三只松鼠牛肉干', category: '肉干卤味', price: 12.0, originalPrice: 15.0, image: 'https://picsum.photos/200/200?random=10' },
+        ];
+        
+        // 购物车数据
+        let cart = [];
+        
+        // 订单数据
+        let orders = [
+            { 
+                id: '20250521001', 
+                date: '2025-05-21 14:30', 
+                status: 'delivered', 
+                items: [
+                    { product: products[0], quantity: 2 },
+                    { product: products[5], quantity: 1 }
+                ],
+                total: 14.0
+            },
+            { 
+                id: '20250521002', 
+                date: '2025-05-21 10:15', 
+                status: 'processing', 
+                items: [
+                    { product: products[3], quantity: 1 },
+                    { product: products[7], quantity: 1 }
+                ],
+                total: 21.9
+            },
+            { 
+                id: '20250520003', 
+                date: '2025-05-20 18:45', 
+                status: 'pending', 
+                items: [
+                    { product: products[1], quantity: 1 },
+                    { product: products[2], quantity: 2 }
+                ],
+                total: 21.8
+            }
+        ];
+        
+        // 管理员状态
+        let isAdmin = false;
+        
+        // DOM 元素
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const cartToggle = document.getElementById('cart-toggle');
+        const closeCart = document.getElementById('close-cart');
+        const cartSidebar = document.getElementById('cart-sidebar');
+        const overlay = document.getElementById('overlay');
+        const cartCount = document.getElementById('cart-count');
+        const cartItems = document.getElementById('cart-items');
+        const cartItemsList = document.getElementById('cart-items-list');
+        const emptyCart = document.getElementById('empty-cart');
+        const cartSummary = document.getElementById('cart-summary');
+        const subtotal = document.getElementById('subtotal');
+        const deliveryFee = document.getElementById('delivery-fee');
+        const total = document.getElementById('total');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        const checkoutModal = document.getElementById('checkout-modal');
+        const cancelCheckout = document.getElementById('cancel-checkout');
+        const placeOrder = document.getElementById('place-order');
+        const productGrid = document.getElementById('product-grid');
+        const adminLoginBtn = document.getElementById('admin-login-btn');
+        const mobileAdminLoginBtn = document.getElementById('mobile-admin-login-btn');
+        const adminLoginModal = document.getElementById('admin-login-modal');
+        const loginBtn = document.getElementById('login-btn');
+        const priceManagementModal = document.getElementById('price-management-modal');
+        const closePriceManagement = document.getElementById('close-price-management');
+        const priceManagementTable = document.getElementById('price-management-table');
+        const searchProduct = document.getElementById('search-product');
+        const filterCategory = document.getElementById('filter-category');
+        const savePrices = document.getElementById('save-prices');
+        const priceEditModal = document.getElementById('price-edit-modal');
+        const editProductName = document.getElementById('edit-product-name');
+        const editPrice = document.getElementById('edit-price');
+        const editOriginalPrice = document.getElementById('edit-original-price');
+        const confirmEditPrice = document.getElementById('confirm-edit-price');
+        const myOrdersBtn = document.getElementById('my-orders-btn');
+        const mobileMyOrdersBtn = document.getElementById('mobile-my-orders-btn');
+        const myOrdersModal = document.getElementById('my-orders-modal');
+        const closeOrders = document.getElementById('close-orders');
+        const searchOrders = document.getElementById('search-orders');
+        const filterOrderStatus = document.getElementById('filter-order-status');
+        const ordersContainer = document.getElementById('orders-container');
+        const emptyOrders = document.getElementById('empty-orders');
+        const ordersList = document.getElementById('orders-list');
+        const contactUsBtn = document.getElementById('contact-us-btn');
+        const mobileContactUsBtn = document.getElementById('mobile-contact-us-btn');
+        const contactUsModal = document.getElementById('contact-us-modal');
+        const closeContactUs = document.getElementById('close-contact-us');
+        const faqToggles = document.querySelectorAll('.faq-toggle');
+        const onlineSupportBtn = document.getElementById('online-support-btn');
+        const successToast = document.getElementById('success-toast');
+        
+        // 生成商品卡片
+        function createProductCard(product) {
+            const discount = Math.round((1 - product.price / product.originalPrice) * 10);
+            
+            return `
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                    <div class="relative">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover">
+                        ${discount > 0 ? `<div class="absolute top-2 left-2 bg-primary text-white text-xs px-2 py-1 rounded">${discount}折</div>` : ''}
+                        <button class="add-to-cart absolute bottom-2 right-2 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary/90 transition-colors" data-id="${product.id}">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-medium mb-1">${product.name}</h3>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class
